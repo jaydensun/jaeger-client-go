@@ -21,9 +21,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/opentracing/opentracing-go"
-
-	"github.com/uber/jaeger-client-go"
 	"github.com/uber/jaeger-client-go/internal/baggage/remote"
 	throttler "github.com/uber/jaeger-client-go/internal/throttler/remote"
 	"github.com/uber/jaeger-client-go/rpcmetrics"
@@ -406,7 +403,7 @@ func (rc *ReporterConfig) newTransport() (jaeger.Transport, error) {
 		if rc.User != "" && rc.Password != "" {
 			httpOptions = append(httpOptions, transport.HTTPBasicAuth(rc.User, rc.Password))
 		}
-		return transport.NewHTTPTransport(rc.CollectorEndpoint, httpOptions...), nil
+		return transport.NewConcurrentHttpTransport(transport.NewHTTPTransport(rc.CollectorEndpoint, httpOptions...)), nil
 	default:
 		return jaeger.NewUDPTransport(rc.LocalAgentHostPort, 0)
 	}
